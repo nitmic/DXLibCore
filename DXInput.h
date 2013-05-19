@@ -18,3 +18,4 @@ public:
 	DXInput();
 	~DXInput();
 };
+

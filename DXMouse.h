@@ -17,3 +17,4 @@ public:
 	bool		isPressed(long i);
 	bool		isFree(long i);
 };
+

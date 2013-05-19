@@ -36,3 +36,4 @@ private:
     //BOOL    FindBestWindowedMode(BOOL bRequireHAL, BOOL bRequireREF );
     //BOOL    FindBestFullscreenMode(BOOL bRequireHAL, BOOL bRequireREF );
 };
+

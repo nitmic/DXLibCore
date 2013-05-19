@@ -19,15 +19,15 @@ DXInput::~DXInput(){
 bool DXInput::Setup(HINSTANCE hInst,HWND hWnd){
 	m_pInput = DXPrimitiveInput::Create(hInst, GetSingleton<DXManager>()->getDevice());
 	//キーボードの初期化
-	if(GetSingleton<DXKeyboard>()->Setup(hWnd, m_pInput)){
+	if(!GetSingleton<DXKeyboard>()->Setup(hWnd, m_pInput)){
 		return false;
 	}
 	//ジョイパッドの初期化
-	if(GetSingleton<DXJoypad>()->Setup(hWnd, m_pInput)){
+	if(!GetSingleton<DXJoypad>()->Setup(hWnd, m_pInput)){
 		return false;
 	}
 	//マウスの初期化
-	if(GetSingleton<DXMouse>()->Setup(hWnd, m_pInput)){
+	if(!GetSingleton<DXMouse>()->Setup(hWnd, m_pInput)){
 		return false;
 	}
 	m_pMouseDevice = GetSingleton<DXMouse>();

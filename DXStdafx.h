@@ -15,4 +15,5 @@
 
 #include "Error.h"
 #include "DXPrimitive.h"
-#include <TTL\Singleton.hpp>
+#include <Singleton.hpp>
+

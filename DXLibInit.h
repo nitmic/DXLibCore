@@ -1,9 +1,9 @@
 #pragma once
 #include "DXStdafx.h"
+#include "DXManager.h"
 #include "DXInput.h"
 #include "DXWindow.h"
 #include "DXFPSCounter.h"
-#include "DXManager.h"
 
 class DXApp : public Singleton<DXApp>{
 	friend Singleton<DXApp>;

@@ -18,3 +18,4 @@ public:
 };
 
 #define ERROR_MSG(msg)	Error::printf(msg, __LINE__, __FILE__)
+

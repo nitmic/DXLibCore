@@ -38,3 +38,4 @@ protected:
 	double			m_fTimer;			//!<	アプリケーションタイマー
 	long long		m_llBaseTime;		//!<	ベース時間	
 };
+

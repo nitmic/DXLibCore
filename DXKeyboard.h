@@ -17,3 +17,4 @@ public:
 	bool		isPressed(unsigned char uDikCode);
 	bool		isFree(unsigned char uDikCode);
 };
+

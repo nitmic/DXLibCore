@@ -25,3 +25,4 @@ private:
 
 	bool (CALLBACK *m_pProcFunc)(HWND, UINT, WPARAM, LPARAM);	//!<	プロシージャ関数.falseを返すとデフォルトの処理を行う
 };
+

@@ -40,3 +40,4 @@ private:
 	static BOOL CALLBACK	EnumObjectCallback(DIDEVICEOBJECTINSTANCE *pDidIns, void *pThis);
 
 };
+

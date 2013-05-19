@@ -16,14 +16,12 @@
 #include <dxerr.h>
 #include <dsound.h>
 #include <memory>
-#include <TTL\Delegater.hpp>
+#include <Delegater.hpp>
 #include "dinput.h"
 
-template<class T>
-void SAFE_RELEASE(T * p){ p->Release(); }
+template<class T> void SAFE_RELEASE(T * p){ p->Release(); }
 
-template<>
-void SAFE_RELEASE(IDirectInputDevice8 * p){
+template<> void SAFE_RELEASE<IDirectInputDevice8>(IDirectInputDevice8 * p){
 	p->Unacquire();
 	p->Release();
 }
