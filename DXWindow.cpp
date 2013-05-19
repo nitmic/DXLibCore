@@ -4,8 +4,8 @@
 *@brief	
 */
 DXWindow::DXWindow(){
-	memset(m_IconName, 0, sizeof(TCHAR) * 256);
-	wcscpy(m_AppName, __T("DXDefaultAppName"));
+	memset(m_IconName, 0, sizeof(TCHAR) * MAXSIZE);
+	wcscpy_s(m_AppName, __T("DXDefaultAppName"));
 	m_pProcFunc		= nullptr;
 	m_hAccel = nullptr;
 }
@@ -58,7 +58,7 @@ LRESULT CALLBACK DXWindow::WindowProc(HWND hWnd, UINT msg, WPARAM w, LPARAM l){
 	return 0;
 }
 
-bool DXWindow::ExecuteMessage(bool *pbEndApp){
+bool DXWindow::executeMessage(bool *pbEndApp){
 	if(PeekMessage(&m_Msg, NULL, 0, 0, PM_REMOVE)){
 		if(m_Msg.message == WM_QUIT){
 			*pbEndApp = true;
@@ -81,7 +81,7 @@ void DXWindow::setProc(bool (CALLBACK *pFunc)(HWND, UINT, WPARAM, LPARAM)){
 	m_pProcFunc = pFunc;
 }
 
-bool DXWindow::init(HINSTANCE hInstance, long w, long h, bool bWindowed){
+bool DXWindow::Init(HINSTANCE hInstance, long w, long h, bool bWindowed){
 	//ウィンドウの幅と高さを計算
 	long iWndWidth  = w + GetSystemMetrics(SM_CXFIXEDFRAME) * 2;
 	long iWndHeight = h + GetSystemMetrics(SM_CXFIXEDFRAME) * 2 +

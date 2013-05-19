@@ -12,11 +12,11 @@ public:
 	void AppLoop();
 	bool AppIdle();
 	
-	void	SetOnFrameUpdate(std::function<bool(void)> func);
-	void	SetOnFrameDraw(std::function<void(void)> func);
+	void	setOnFrameUpdate(std::function<bool(void)> func);
+	void	setOnFrameDraw(std::function<void(void)> func);
 
-	long	GetExitCode()	{return m_pWindow->GetMsg().wParam;}
-	std::shared_ptr<DXManager> &	GetDXManager()	{return m_pDirectManager;}
+	long	getExitCode()	{return m_pWindow->getMsg().wParam;}
+	std::shared_ptr<DXManager> &	getDXManager()	{return m_pDirectManager;}
 
 	DXApp();
 	~DXApp();

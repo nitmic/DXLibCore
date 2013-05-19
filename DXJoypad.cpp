@@ -20,9 +20,10 @@ bool DXJoypad::Setup(
 	HWND & hWnd,
 	std::shared_ptr<DXPrimitiveInput> & pInput
 ){
-	m_pInput = pInput;
+	m_pInputWrapped = pInput;
+	m_pInput = **m_pInputWrapped;
 	//ジョイパッドの列挙
-	if(FAILED((*m_pInput)->EnumDevices(
+	if(FAILED(m_pInput->EnumDevices(
 		DI8DEVCLASS_GAMECTRL, (LPDIENUMDEVICESCALLBACK)GetCallback, (void *)this, DIEDFL_ATTACHEDONLY
 	))){
 		return false;
@@ -32,23 +33,23 @@ bool DXJoypad::Setup(
 
 	for(long i = 0; i < iLoopMax; ++i){
 		//フォーマットの設定
-		if(FAILED((*m_pDevice[i])->SetDataFormat(&c_dfDIJoystick2))){
+		if(FAILED(m_pDevice[i]->SetDataFormat(&c_dfDIJoystick2))){
 			return false;
 		}
 		//協調レベルの設定
-		if(FAILED((*m_pDevice[i])->SetCooperativeLevel(
+		if(FAILED(m_pDevice[i]->SetCooperativeLevel(
 			hWnd, DISCL_EXCLUSIVE | DISCL_FOREGROUND
 		))){
 			return false;
 		}
-		if(FAILED((*m_pDevice[i])->EnumObjects(
+		if(FAILED(m_pDevice[i]->EnumObjects(
 			(LPDIENUMDEVICEOBJECTSCALLBACK)EnumObjectCallback, (VOID *)this, DIDFT_ALL
 		))){
 			return false;
 		}
 		m_iSettingJoypad++;
 		//ジョイパッド制御開始
-		(*m_pDevice[i])->Acquire();
+		m_pDevice[i]->Acquire();
 	}
 	return true;
 }
@@ -62,10 +63,13 @@ bool DXJoypad::Setup(
 BOOL CALLBACK DXJoypad::GetCallback(DIDEVICEINSTANCE *pDidIns, void *pCont){
 	DXJoypad *pThis = (DXJoypad *)pCont;
 	//デバイスの作成
-	pThis->m_pDevice[pThis->m_iDetectJoypadCount] = DXPrimitiveInputDevice::Create(pDidIns->guidInstance, pThis->m_pInput);
-	if(pThis->m_pDevice[pThis->m_iDetectJoypadCount]){
+	pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount] = DXPrimitiveInputDevice::Create(pDidIns->guidInstance, pThis->m_pInputWrapped);
+	if(pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount]){
 		return DIENUM_STOP;
 	}
+	pThis->m_pDevice[pThis->m_iDetectJoypadCount] = **pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount];
+
+
 	//ジョイパッドの数を増加
 	pThis->m_iDetectJoypadCount++;
 
@@ -92,8 +96,7 @@ BOOL CALLBACK DXJoypad::EnumObjectCallback(DIDEVICEOBJECTINSTANCE *pDidIns, void
 		diprg.diph.dwObj		= pDidIns->dwType;
 		diprg.lMin				= DX_PROP_MIN;
 		diprg.lMax				= DX_PROP_MAX;
-
-		if(FAILED((*pThis->m_pDevice[pThis->m_iSettingJoypad])->SetProperty(
+		if(FAILED(pThis->m_pDevice[pThis->m_iSettingJoypad]->SetProperty(
 			DIPROP_RANGE, &diprg.diph
 		))){
 			return DIENUM_STOP;
@@ -114,14 +117,14 @@ void DXJoypad::Update(){
 
 	for(long i = 0; i < iLoopMax; ++i){
 		HRESULT hr;
-		if(FAILED((*m_pDevice[i])->Poll())){
+		if(FAILED(m_pDevice[i]->Poll())){
 			do{
-				hr = (*m_pDevice[i])->Acquire();
+				hr = m_pDevice[i]->Acquire();
 			}while(hr == DIERR_INPUTLOST);
 			ZeroMemory(&m_JoypadState[i][m_iStateIndex], sizeof(m_JoypadState[i][m_iStateIndex]));
 			return ;
 		}
-		hr = (*m_pDevice[i])->GetDeviceState(sizeof(DIJOYSTATE2), &m_JoypadState[i][m_iStateIndex]);
+		hr = m_pDevice[i]->GetDeviceState(sizeof(DIJOYSTATE2), &m_JoypadState[i][m_iStateIndex]);
 	}
 }
 

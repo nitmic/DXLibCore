@@ -11,7 +11,7 @@ class DXDeviceObject{
 public:
 	friend	DXManager;
 
-	static DXPrimitiveDevice *      getD3DDevice(){return m_spD3DDevice.get();}
+	static IDirect3DDevice9 *      getD3DDevice(){return **m_spD3DDevice;}
 	static D3DPRESENT_PARAMETERS *  getD3DPP(){return m_spD3DPP.get();}
 
 	DXDeviceObject();

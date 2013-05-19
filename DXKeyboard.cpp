@@ -2,6 +2,7 @@
 
 DXKeyboard::DXKeyboard(){
 	m_pDevice = nullptr;
+	m_pDeviceWrapped = nullptr;
 	m_iStateIndex			= 0;
 	memset(m_KeyboardState, 0, sizeof(unsigned char) * 2 * 256);
 }
@@ -12,33 +13,35 @@ bool DXKeyboard::Setup(
 	std::shared_ptr<DXPrimitiveInput> & pInput
 ){
 	//デバイスの生成
-	m_pDevice = DXPrimitiveInputDevice::Create(GUID_SysKeyboard, pInput);
-	if(!m_pDevice){
+	m_pDeviceWrapped = DXPrimitiveInputDevice::Create(GUID_SysKeyboard, pInput);
+	if(!m_pDeviceWrapped){
 		return false;
 	}
+	m_pDevice = **m_pDeviceWrapped;
+
 	//デバイスをキーボードに設定
-	if(FAILED((*m_pDevice)->SetDataFormat(&c_dfDIKeyboard))){
+	if(FAILED(m_pDevice->SetDataFormat(&c_dfDIKeyboard))){
 		return false;
 	}
 	//協調レベルの設定
-	if(FAILED((*m_pDevice)->SetCooperativeLevel(
+	if(FAILED(m_pDevice->SetCooperativeLevel(
 		  hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND
 	))){
 		return false;
 	}
 	//デバイスの取得
-	(*m_pDevice)->Acquire();
+	m_pDevice->Acquire();
 
 	return true;
 }
 
 void DXKeyboard::Update(){
 	m_iStateIndex = 1 - m_iStateIndex;
-	(*m_pDevice)->GetDeviceState(sizeof(m_KeyboardState[m_iStateIndex]), &m_KeyboardState[m_iStateIndex]);
+	m_pDevice->GetDeviceState(sizeof(m_KeyboardState[m_iStateIndex]), &m_KeyboardState[m_iStateIndex]);
 
 	HRESULT hr;
 	do{
-		hr = (*m_pDevice)->Acquire();
+		hr = m_pDevice->Acquire();
 	}while(hr == DIERR_INPUTLOST);
 }
 

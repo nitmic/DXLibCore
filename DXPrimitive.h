@@ -1,33 +1,33 @@
 #pragma once
-#include "DXStdafx.h"
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dxerr.lib")
+#pragma comment(lib, "d3dx9.lib")
+#pragma comment(lib, "d3d9.lib")
+#pragma comment(lib, "winmm.lib")
+
+#pragma comment(lib, "user32.lib")
+
+#pragma comment(lib, "dinput8.lib")
+#include <windows.h>
+#include <Windows.h>
+#include <tchar.h>
+#include <d3d9.h>
+#include <d3dx9.h>
+#include <dxerr.h>
+#include <dsound.h>
+#include <memory>
+#include <TTL\Delegater.hpp>
+#include "dinput.h"
 
 template<class T>
-class Delegater{
-public:
-	void setDelegateObject(std::shared_ptr<T> & object){
-		delegate_object = object;
-	}
-	void releaseDelegateObject(){
-		delegate_object.reset();
-	}
-	T * getDelegateObject(){
-		return delegate_object.get();
-	}
-	T * operator->(){
-		return getDelegateObject();
-	}
-	T * operator*(){
-		return getDelegateObject();
-	}
-private:
-	std::shared_ptr<T> delegate_object;
-};
+void SAFE_RELEASE(T * p){ p->Release(); }
 
-template<class T>
-void ReleaseDelegater(T * p){
-	p->releaseDelegateObject();
-	delete p;
+template<>
+void SAFE_RELEASE(IDirectInputDevice8 * p){
+	p->Unacquire();
+	p->Release();
 }
+
 
 class DXPrimitiveCore : public Delegater<IDirect3D9>{
 public:

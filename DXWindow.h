@@ -6,17 +6,20 @@ class DXWindow : public Singleton<DXWindow>{
 public:
 	static LRESULT CALLBACK	WindowProc(HWND, UINT, WPARAM, LPARAM);
 	void   setProc(bool (CALLBACK *pFunc)(HWND, UINT, WPARAM, LPARAM));
-	bool   init(HINSTANCE hInstance, long w, long h, bool bWindowed);
+	bool   Init(HINSTANCE hInstance, long w, long h, bool bWindowed);
 
-	bool	ExecuteMessage(bool *pbEndApp);
+	bool	executeMessage(bool *pbEndApp);
 	HWND	getHWND()	{return m_hWnd;}
 	MSG		getMsg()	{return m_Msg;}
 	DXWindow();
 	~DXWindow();
 private:
+	enum{
+		MAXSIZE = 256
+	};
 	HWND					m_hWnd;			//!<	ウィンドウハンドル
-	TCHAR					m_IconName[256];//!<	アイコンの名前
-	TCHAR					m_AppName[256];	//!<	アプリケーションの名前
+	TCHAR					m_IconName[MAXSIZE];//!<	アイコンの名前
+	TCHAR					m_AppName[MAXSIZE];	//!<	アプリケーションの名前
 	MSG						m_Msg;
 	HACCEL					m_hAccel;		//!<	アクセラレータ
 

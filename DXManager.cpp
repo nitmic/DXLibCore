@@ -4,6 +4,7 @@
 DXManager::DXManager(){
     m_pD3D              = nullptr;
     m_pd3dDevice        = nullptr;
+    m_pd3dDeviceWrapped = nullptr;
     m_hWnd              = nullptr;
     m_bWindowed         = true;
 	m_bDeviceLost		= false;
@@ -30,14 +31,16 @@ bool DXManager::Setup(
 	m_pd3dpp = std::make_shared<D3DPRESENT_PARAMETERS>();
 
 	m_hWnd = hwnd;
-	m_pd3dDevice = DXPrimitiveDevice::Create(m_pd3dpp, m_hWnd, m_pD3D);
-	if(m_pd3dDevice == nullptr){
+
+	m_pd3dDeviceWrapped = DXPrimitiveDevice::Create(m_pd3dpp, m_hWnd, m_pD3D);
+	if(m_pd3dDeviceWrapped == nullptr){
 		return false;
 	}
+	m_pd3dDevice = **m_pd3dDeviceWrapped;
 
 	InitRenderStage();
 
-	DXDeviceObject::m_spD3DDevice = m_pd3dDevice;
+	DXDeviceObject::m_spD3DDevice = m_pd3dDeviceWrapped;
 	DXDeviceObject::m_spD3DPP = m_pd3dpp;
 
     return true;
@@ -72,18 +75,18 @@ bool DXManager::beginScene(){
 		}
 	}
 	*/
-	(*m_pd3dDevice)->Clear(0,NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
+	m_pd3dDevice->Clear(0,NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
 		0xff000066, 1.0f, 0);
 
-	(*m_pd3dDevice)->BeginScene();
+	m_pd3dDevice->BeginScene();
 
 	return true;
 }
 bool DXManager::endScene(){
-	(*m_pd3dDevice)->EndScene();
+	m_pd3dDevice->EndScene();
 
 	HRESULT hr;
-	hr = (*m_pd3dDevice)->Present(NULL, NULL, NULL, NULL);
+	hr = m_pd3dDevice->Present(NULL, NULL, NULL, NULL);
 
 	switch(hr){
 	case D3DERR_DEVICELOST:
@@ -99,13 +102,13 @@ bool DXManager::endScene(){
 }
 
 VOID DXManager::InitRenderStage(){
-	(*m_pd3dDevice)->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	(*m_pd3dDevice)->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	(*m_pd3dDevice)->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	(*m_pd3dDevice)->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	(*m_pd3dDevice)->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	(*m_pd3dDevice)->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	m_pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 
-	(*m_pd3dDevice)->SetRenderState(D3DRS_ZENABLE, TRUE);
-	(*m_pd3dDevice)->SetRenderState(D3DRS_LIGHTING, TRUE);
+	m_pd3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
+	m_pd3dDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 }

@@ -3,7 +3,8 @@
 class DXKeyboard : public Singleton<DXKeyboard>{
 	friend Singleton<DXKeyboard>;
 private:
-	std::shared_ptr<DXPrimitiveInputDevice> m_pDevice;
+	std::shared_ptr<DXPrimitiveInputDevice> m_pDeviceWrapped;
+	IDirectInputDevice8 * m_pDevice;
 	unsigned char			m_KeyboardState[2][256];		//!<	キーボードの状態
 	long					m_iStateIndex;		//!<	状態のインデックス
 public:

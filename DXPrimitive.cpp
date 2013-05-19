@@ -18,9 +18,10 @@ std::shared_ptr<DXPrimitiveDevice> DXPrimitiveDevice::Create(
 	HWND & hWnd,
 	std::shared_ptr<DXPrimitiveCore> & core
 ){
+	auto pD3D = **core;
 	// 現在のディスプレイモードを取得
 	D3DDISPLAYMODE d3ddm;
-    if(FAILED((*core)->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm))) {
+    if(FAILED(pD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm))) {
 		return nullptr;
 	}
 	ZeroMemory(pd3dpp.get(), sizeof(D3DPRESENT_PARAMETERS));
@@ -42,10 +43,10 @@ std::shared_ptr<DXPrimitiveDevice> DXPrimitiveDevice::Create(
 	
 	//以下P33参照
 	IDirect3DDevice9 * pd3dDevice;
-	if( FAILED( (*core)->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
-	if( FAILED( (*core)->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
-	if( FAILED( (*core)->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
-	if( FAILED( (*core)->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
+	if( FAILED( pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
+	if( FAILED( pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
+	if( FAILED( pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
+	if( FAILED( pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, pd3dpp.get(), &pd3dDevice ) ) )
 	{
 		return nullptr;
 	}

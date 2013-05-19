@@ -14,31 +14,33 @@ bool DXMouse::Setup(
 	std::shared_ptr<DXPrimitiveInput> & pInput
 ){
 	//デバイスの作成
-	m_pDevice = DXPrimitiveInputDevice::Create(GUID_SysMouse, pInput);
-	if(!m_pDevice){
+	m_pDeviceWrapped = DXPrimitiveInputDevice::Create(GUID_SysMouse, pInput);
+	if(!m_pDeviceWrapped){
 		return false;
 	}
+	m_pDevice = **m_pDeviceWrapped;
+
 	//デバイスをマウスに設定
-	if(FAILED((*m_pDevice)->SetDataFormat(&c_dfDIMouse2))){
+	if(FAILED(m_pDevice->SetDataFormat(&c_dfDIMouse2))){
 		return false;
 	}
 	//協調レベルの設定
-	if(FAILED((*m_pDevice)->SetCooperativeLevel(
+	if(FAILED(m_pDevice->SetCooperativeLevel(
 		  hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND
 	))){
 		return false;
 	}
 	//制御開始
-	(*m_pDevice)->Acquire();
+	m_pDevice->Acquire();
 	return true;
 }
 
 void DXMouse::Update(){
 	m_iStateIndex = 1 - m_iStateIndex;
 	HRESULT hr;
-	(*m_pDevice)->GetDeviceState(sizeof(DIMOUSESTATE2), &m_MouseState[m_iStateIndex]);
+	m_pDevice->GetDeviceState(sizeof(DIMOUSESTATE2), &m_MouseState[m_iStateIndex]);
 	do{
-		hr = (*m_pDevice)->Acquire();
+		hr = m_pDevice->Acquire();
 	}while(hr == DIERR_INPUTLOST);
 }
 

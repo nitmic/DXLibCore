@@ -9,9 +9,13 @@ private:
       DX_PROP_MAX = 10000
 	};
 	enum{JOYPAD_MAX		= 4};
-	std::array<std::shared_ptr<DXPrimitiveInputDevice>,JOYPAD_MAX>    m_pDevice;
 
-	std::shared_ptr<DXPrimitiveInput> m_pInput;    //!< デバイス確保に必要
+	std::array<std::shared_ptr<DXPrimitiveInputDevice>,JOYPAD_MAX>    m_pDeviceWrapped;
+	std::array<IDirectInputDevice8 *,JOYPAD_MAX> m_pDevice;
+
+	std::shared_ptr<DXPrimitiveInput> m_pInputWrapped;    //!< デバイス確保に必要
+	IDirectInput8 * m_pInput;
+
 	long          m_iDetectJoypadCount;            //!<	検出したジョイパッドの数
 	long          m_iSettingJoypad;	               //!<	設定しているジョイパッド
 	DIJOYSTATE2   m_JoypadState[JOYPAD_MAX][2];    //!<	ジョイパッドの状態
