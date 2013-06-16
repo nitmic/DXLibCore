@@ -1,4 +1,10 @@
 #pragma once
 #include "DXStdafx.h"
 #include "DXLibInit.h"
-
+#include "DXWindow.h"
+#include "DXManager.h"
+#include "DXFPSCounter.h"
+#include "DXInput.h"
+#include "DXMouse.h"
+#include "DXKeyboard.h"
+#include "DXJoypad.h"

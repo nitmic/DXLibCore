@@ -1,12 +1,24 @@
+#include "DXStdafx.h"
 #include "DXMouse.h"
+#include <Binary.h>
 
 namespace DXLib{
+	struct DXMouse::Impl{
+		std::shared_ptr<DXPrimitiveInputDevice> m_pDeviceWrapped;
+		IDirectInputDevice8 * m_pDevice;
+		std::array<DIMOUSESTATE2,2>    m_MouseState;    //!<	マウスの状態
+		Binary      m_iStateIndex;     //!<	状態のインデックス
+	};
+
+
 	DXMouse::DXMouse(){
-		m_pDevice = nullptr;
-		m_iStateIndex = 0;
-		std::for_each(m_MouseState.begin(),m_MouseState.end(),[](DIMOUSESTATE2 & state){
-			memset(&state, 0, sizeof(DIMOUSESTATE2));
-		});
+		__impl__ = std::make_shared<Impl>();
+		__impl__->m_pDevice = nullptr;
+		std::for_each(
+			__impl__->m_MouseState.begin(),
+			__impl__->m_MouseState.end(),
+			[](DIMOUSESTATE2 & state){ memset(&state, 0, sizeof(DIMOUSESTATE2)); }
+		);
 	}
 	DXMouse::~DXMouse(){}
 
@@ -15,45 +27,49 @@ namespace DXLib{
 		std::shared_ptr<DXPrimitiveInput> & pInput
 	){
 		//デバイスの作成
-		m_pDeviceWrapped = DXPrimitiveInputDevice::Create(GUID_SysMouse, pInput);
-		if(!m_pDeviceWrapped){
+		__impl__->m_pDeviceWrapped = DXPrimitiveInputDevice::Create(GUID_SysMouse, pInput);
+		if(!__impl__->m_pDeviceWrapped){
 			return false;
 		}
-		m_pDevice = **m_pDeviceWrapped;
+		__impl__->m_pDevice = __impl__->m_pDeviceWrapped->getDelegateObject();
 
 		//デバイスをマウスに設定
-		if(FAILED(m_pDevice->SetDataFormat(&c_dfDIMouse2))){
+		if(FAILED(
+			__impl__->m_pDevice->SetDataFormat(&c_dfDIMouse2)
+		)){
 			return false;
 		}
 		//協調レベルの設定
-		if(FAILED(m_pDevice->SetCooperativeLevel(
+		if(FAILED(
+			__impl__->m_pDevice->SetCooperativeLevel(
 			  hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND
-		))){
+			)
+		)){
 			return false;
 		}
 		//制御開始
-		m_pDevice->Acquire();
+		__impl__->m_pDevice->Acquire();
 		return true;
 	}
 
 	void DXMouse::Update(){
-		m_iStateIndex = 1 - m_iStateIndex;
+		__impl__->m_iStateIndex.reverse();
 		HRESULT hr;
-		m_pDevice->GetDeviceState(sizeof(DIMOUSESTATE2), &m_MouseState[m_iStateIndex]);
+		__impl__->m_pDevice->GetDeviceState(sizeof(DIMOUSESTATE2), &__impl__->m_MouseState[__impl__->m_iStateIndex]);
 		do{
-			hr = m_pDevice->Acquire();
+			hr = __impl__->m_pDevice->Acquire();
 		}while(hr == DIERR_INPUTLOST);
 	}
 
 	bool DXMouse::isPressed(long i){
-		if(m_MouseState[m_iStateIndex].rgbButtons[i] & 0x80){
+		if(__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80){
 			return true;
 		}
 		return false;
 	}
 
 	bool DXMouse::isFree(long i){
-		if((m_MouseState[m_iStateIndex].rgbButtons[i] & 0x80) == 0){
+		if((__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0){
 			return true;
 		}
 		return false;
@@ -61,8 +77,8 @@ namespace DXLib{
 
 	bool DXMouse::isJustPressed(long i){
 		if(
-			m_MouseState[m_iStateIndex].rgbButtons[i] & 0x80 &&
-			(m_MouseState[1 - m_iStateIndex].rgbButtons[i] & 0x80) == 0
+			__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80 &&
+			(__impl__->m_MouseState[1 - __impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0
 		){
 			return true;
 		}
@@ -72,8 +88,8 @@ namespace DXLib{
 	bool DXMouse::isJustPulled(long i)
 	{
 		if(
-			(m_MouseState[m_iStateIndex].rgbButtons[i] & 0x80) == 0 &&
-			(m_MouseState[m_iStateIndex].rgbButtons[i] & 0x80)
+			(__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0 &&
+			(__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80)
 		){
 			return true;
 		}

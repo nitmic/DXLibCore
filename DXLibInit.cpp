@@ -1,13 +1,28 @@
+#include "DXStdafx.h"
+
 #include "DXLibInit.h"
 
+#include "DXManager.h"
+#include "DXInput.h"
+#include "DXWindow.h"
+#include "DXFPSCounter.h"
 namespace DXLib{
+	struct DXApp::Impl{
+		std::shared_ptr<DXWindow>       m_pWindow;          //!<	ウィンドウクラスへのポインタ
+		std::function<bool(void)>       m_onFrameUpdate;    //!<	更新用関数ポインタ
+		std::function<void(void)>       m_onFrameDraw;      //!<	描画用関数ポインタ
+		std::shared_ptr<DXFPSCounter>   m_pFPSCounter;      //!<	FPS測定クラス
+		std::shared_ptr<DXInput>        m_pDirectInput;     //!<	DirectInput管理クラス
+		std::shared_ptr<DXManager>      m_pDirectManager;   //!<	DirectX管理クラス
+	};
+
 	/**
 	*@brief	
 	*/
 	DXApp::DXApp(){
-		m_pWindow = nullptr;
-		m_onFrameUpdate = [](){return true;};
-		m_onFrameDraw = [](){};
+		__impl__ = std::make_shared<Impl>();
+		__impl__->m_onFrameUpdate = [](){return true;};
+		__impl__->m_onFrameDraw = [](){};
 	}
 
 	/**
@@ -15,8 +30,8 @@ namespace DXLib{
 	DXApp::~DXApp(){}
 
 	bool DXApp::Setup(HINSTANCE hInst, long w, long h, int nCmdShow){
-		m_pWindow = GetSingleton<DXWindow>();
-		m_pFPSCounter = GetSingleton<DXFPSCounter>();
+		__impl__->m_pWindow = GetSingleton<DXWindow>();
+		__impl__->m_pFPSCounter = GetSingleton<DXFPSCounter>();
 		bool bWindowed = true;
 		//コモンコントロール
 		/*
@@ -25,14 +40,14 @@ namespace DXLib{
 		ic.dwICC = ICC_COOL_CLASSES | ICC_BAR_CLASSES | ICC_UPDOWN_CLASS;
 		InitCommonControlsEx(&ic);
 		*/
-		if(!m_pWindow->Init(hInst, w, h, bWindowed)){
+		if(!__impl__->m_pWindow->Init(hInst, w, h, bWindowed)){
 			//ウィンドウの生成
 			ERROR_MSG(__T("DXWindow::Init"));
 			return false;
 		}
 		//DirectXの初期化
-		m_pDirectManager = GetSingleton<DXManager>();
-		if(!m_pDirectManager->Setup(m_pWindow->getHWND(), w, h, nCmdShow)){
+		__impl__->m_pDirectManager = GetSingleton<DXManager>();
+		if(!__impl__->m_pDirectManager->Setup(__impl__->m_pWindow->getHWND(), w, h, nCmdShow)){
 			ERROR_MSG(__T("DXManager::Setup"));
 			return false;
 		}
@@ -46,8 +61,8 @@ namespace DXLib{
 		}
 		*/
 		//DirectInputの初期化
-		m_pDirectInput = GetSingleton<DXInput>();
-		if(!m_pDirectInput->Setup(hInst,m_pWindow->getHWND())){
+		__impl__->m_pDirectInput = GetSingleton<DXInput>();
+		if(!__impl__->m_pDirectInput->Setup(hInst,__impl__->m_pWindow->getHWND())){
 			ERROR_MSG(__T("DXInput::Setup"));
 			return false;
 		}
@@ -68,7 +83,7 @@ namespace DXLib{
 		bool bEndApp;
 		while(1){
 			bEndApp = false;
-			if(m_pWindow->executeMessage(&bEndApp)){
+			if(__impl__->m_pWindow->executeMessage(&bEndApp)){
 				if(bEndApp){
 					break;
 				}
@@ -81,26 +96,26 @@ namespace DXLib{
 	}
 	bool DXApp::AppIdle(){
 		//FPSの更新
-		m_pFPSCounter->UpdateFPS();
+		__impl__->m_pFPSCounter->UpdateFPS();
 
 		//入力の更新
-		m_pDirectInput->Update();
+		__impl__->m_pDirectInput->Update();
 
-		if(!m_onFrameUpdate()){
+		if(!__impl__->m_onFrameUpdate()){
 			//更新
 			return false;
 		}
 		//描画開始宣言
-		if(!m_pDirectManager->beginScene()){
+		if(!__impl__->m_pDirectManager->beginScene()){
 			ERROR_MSG(__T("DXManager::beginScene"));
 			return false;
 		}
 
 		//描画
-		m_onFrameDraw();
+		__impl__->m_onFrameDraw();
 
 		//描画終了宣言
-		if(!m_pDirectManager->endScene()){
+		if(!__impl__->m_pDirectManager->endScene()){
 			ERROR_MSG(__T("DXManager::endScene"));
 			return false;
 		}
@@ -109,10 +124,17 @@ namespace DXLib{
 	}
 
 	void DXApp::setOnFrameUpdate(std::function<bool(void)> func){
-		m_onFrameUpdate = func;
+		__impl__->m_onFrameUpdate = func;
 	}
 
 	void DXApp::setOnFrameDraw(std::function<void(void)> func){
-		m_onFrameDraw = func;
+		__impl__->m_onFrameDraw = func;
+	}
+	
+	long DXApp::getExitCode()	{
+		return __impl__->m_pWindow->getMsg().wParam;
+	}
+	std::shared_ptr<DXManager> & DXApp::getDXManager()	{
+		return __impl__->m_pDirectManager;
 	}
 };

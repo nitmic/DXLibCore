@@ -1,14 +1,14 @@
 #pragma once
-#include "DXStdafx.h"
+#include <Windows.h>
+#include <Singleton.hpp>
+
+
 
 namespace DXLib{
+	class DXPrimitiveInput;
+	
 	class DXKeyboard : public Singleton<DXKeyboard>{
 		friend Singleton<DXKeyboard>;
-	private:
-		std::shared_ptr<DXPrimitiveInputDevice> m_pDeviceWrapped;
-		IDirectInputDevice8 * m_pDevice;
-		unsigned char			m_KeyboardState[2][256];		//!<	キーボードの状態
-		long					m_iStateIndex;		//!<	状態のインデックス
 	public:
 		DXKeyboard();
 		~DXKeyboard();
@@ -18,5 +18,9 @@ namespace DXLib{
 		bool		isJustPulled(unsigned char uDikCode);
 		bool		isPressed(unsigned char uDikCode);
 		bool		isFree(unsigned char uDikCode);
+	private:
+		struct Impl;
+		std::shared_ptr<Impl> __impl__;
+
 	};
 };
