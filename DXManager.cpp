@@ -17,7 +17,7 @@ namespace DXLib{
 		unsigned long       m_uCreationWidth;	//!<	ウィンドウの幅
 		unsigned long       m_uCreationHeight;	//!<	ウィンドウの高さ
 		bool                m_bDeviceLost;		//!<	デバイスロストしているかどうか
-
+		std::shared_ptr<DXDefaultRenderingEngine> m_pEngine;
 		//CNcDXLostManager	m_LostManager;		//!<	ロストマネージャ
 		//D3DDISPLAYMODE m_d3ddm;
 	};
@@ -28,6 +28,7 @@ namespace DXLib{
 		__impl__->m_hWnd              = nullptr;
 		__impl__->m_bWindowed         = true;
 		__impl__->m_bDeviceLost		= false;
+		__impl__->m_pEngine            = std::make_shared<DXDefaultRenderingEngine>();
 	}
 
 	DXManager::~DXManager(){}
@@ -136,4 +137,8 @@ namespace DXLib{
 	std::shared_ptr<DXPrimitiveCore> &		DXManager::getDirect(){return __impl__->m_pD3D;}
 
 	bool         DXManager::getWindowed(){return __impl__->m_bWindowed;}
+
+	std::shared_ptr<DXAbsRenderingEngine> DXManager::getDefaultRenderingEngine(){
+		return __impl__->m_pEngine;
+	}
 };

@@ -18,6 +18,7 @@
 #include <memory>
 #include <Delegater.hpp>
 #include "dinput.h"
+#include <tString.h>
 
 namespace DXLib{
 	template<class T> void SAFE_RELEASE(T * p){ p->Release(); }
@@ -63,4 +64,15 @@ namespace DXLib{
 	private:
 		std::shared_ptr<DXPrimitiveInput> m_pInput;
 	};
+
+	class DXPrimitiveHLSL : public Delegater<ID3DXEffect>{
+	public:
+		static std::shared_ptr<DXPrimitiveHLSL> Create(
+			tString name,
+			std::shared_ptr<DXPrimitiveDevice> & pDevice
+		);
+	private:
+		std::shared_ptr<DXPrimitiveDevice> m_pDevice;
+	};
+
 };

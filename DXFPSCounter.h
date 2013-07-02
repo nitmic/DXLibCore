@@ -1,9 +1,6 @@
 #pragma once
-#include <Singleton.hpp>
-
 namespace DXLib{
-	class DXFPSCounter : public Singleton<DXFPSCounter>{
-		friend Singleton<DXFPSCounter>;
+	class DXFPSCounter{
 	public:
 		void	UpdateFPS();
 		void	SetSampleNum(long iSampleNum);

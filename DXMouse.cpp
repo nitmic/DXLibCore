@@ -1,24 +1,22 @@
 #include "DXStdafx.h"
 #include "DXMouse.h"
-#include <Binary.h>
+//#include <Binary.h>
+#include <RingBuffer.hpp>
 
 namespace DXLib{
 	struct DXMouse::Impl{
+		Impl(DIMOUSESTATE2 & inited) : m_MouseState(inited){};
 		std::shared_ptr<DXPrimitiveInputDevice> m_pDeviceWrapped;
 		IDirectInputDevice8 * m_pDevice;
-		std::array<DIMOUSESTATE2,2>    m_MouseState;    //!<	マウスの状態
-		Binary      m_iStateIndex;     //!<	状態のインデックス
+		TUL::RingBuffer<DIMOUSESTATE2,2>    m_MouseState;    //!<	マウスの状態
 	};
 
 
 	DXMouse::DXMouse(){
-		__impl__ = std::make_shared<Impl>();
+		DIMOUSESTATE2 state;
+		memset(&state, 0, sizeof(DIMOUSESTATE2));
+		__impl__ = std::make_shared<Impl>(state);
 		__impl__->m_pDevice = nullptr;
-		std::for_each(
-			__impl__->m_MouseState.begin(),
-			__impl__->m_MouseState.end(),
-			[](DIMOUSESTATE2 & state){ memset(&state, 0, sizeof(DIMOUSESTATE2)); }
-		);
 	}
 	DXMouse::~DXMouse(){}
 
@@ -53,23 +51,23 @@ namespace DXLib{
 	}
 
 	void DXMouse::Update(){
-		__impl__->m_iStateIndex.reverse();
 		HRESULT hr;
-		__impl__->m_pDevice->GetDeviceState(sizeof(DIMOUSESTATE2), &__impl__->m_MouseState[__impl__->m_iStateIndex]);
+		__impl__->m_MouseState.update();
+		__impl__->m_pDevice->GetDeviceState(sizeof(DIMOUSESTATE2), &(__impl__->m_MouseState.current()));
 		do{
 			hr = __impl__->m_pDevice->Acquire();
 		}while(hr == DIERR_INPUTLOST);
 	}
 
 	bool DXMouse::isPressed(long i){
-		if(__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80){
+		if(__impl__->m_MouseState.current().rgbButtons[i] & 0x80){
 			return true;
 		}
 		return false;
 	}
 
 	bool DXMouse::isFree(long i){
-		if((__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0){
+		if((__impl__->m_MouseState.current().rgbButtons[i] & 0x80) == 0){
 			return true;
 		}
 		return false;
@@ -77,8 +75,8 @@ namespace DXLib{
 
 	bool DXMouse::isJustPressed(long i){
 		if(
-			__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80 &&
-			(__impl__->m_MouseState[1 - __impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0
+			__impl__->m_MouseState.current().rgbButtons[i] & 0x80 &&
+			(__impl__->m_MouseState.prev().rgbButtons[i] & 0x80) == 0
 		){
 			return true;
 		}
@@ -88,8 +86,8 @@ namespace DXLib{
 	bool DXMouse::isJustPulled(long i)
 	{
 		if(
-			(__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0 &&
-			(__impl__->m_MouseState[__impl__->m_iStateIndex].rgbButtons[i] & 0x80)
+			(__impl__->m_MouseState.current().rgbButtons[i] & 0x80) == 0 &&
+			(__impl__->m_MouseState.current().rgbButtons[i] & 0x80)
 		){
 			return true;
 		}

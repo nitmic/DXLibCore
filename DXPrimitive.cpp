@@ -93,4 +93,34 @@ namespace DXLib{
 		self->m_pInput = pInput;
 		return self;
 	}
+
+	std::shared_ptr<DXPrimitiveHLSL> DXPrimitiveHLSL::Create(
+			tString name,
+			std::shared_ptr<DXPrimitiveDevice> & pDevice
+	){
+		ID3DXBuffer * pErrorMsgs;
+		ID3DXEffect * pEffect;
+		HRESULT hr = D3DXCreateEffectFromFile(
+			pDevice->getDelegateObject(),
+			name.c_str(),
+			NULL,
+			NULL,
+			0,
+			NULL,
+			&pEffect,
+			&pErrorMsgs
+		);
+		if( FAILED( hr )){
+			if(pErrorMsgs != nullptr && pErrorMsgs->GetBufferPointer() != 0 ){
+				OutputDebugStringA( reinterpret_cast<char*>(pErrorMsgs->GetBufferPointer()) );
+				//↑これを使うとfxファイルのコンパイルエラーを出力内に書いてくれる！すげぇ！今日まで知らんかった！
+			}
+			exit(-1);
+		}
+		auto shared_pEffect = std::shared_ptr<ID3DXEffect>(pEffect, SAFE_RELEASE<ID3DXEffect>);
+		auto self = std::shared_ptr<DXPrimitiveHLSL>(new DXPrimitiveHLSL, ReleaseDelegater<DXPrimitiveHLSL>);
+		self->setDelegateObject(shared_pEffect);
+		self->m_pDevice = pDevice;
+		return self;
+	}
 };

@@ -11,10 +11,11 @@
 //====================================================================
 
 namespace DXLib{
-	std::shared_ptr<DXPrimitiveDevice> DXDeviceObject::m_spD3DDevice = nullptr;
+	std::shared_ptr<DXPrimitiveDevice>     DXDeviceObject::m_spD3DDevice = nullptr;
 	std::shared_ptr<D3DPRESENT_PARAMETERS> DXDeviceObject::m_spD3DPP = nullptr;
+	std::shared_ptr<DXAbsRenderingEngine>    DXDeviceObject::m_spRenderingEngine = nullptr;
 	MediaPath DXDeviceObject::m_pathStorage;
-
+	
 	/**
 	*@brief
 	*/

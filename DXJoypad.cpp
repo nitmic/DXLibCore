@@ -6,10 +6,6 @@ namespace DXLib{
 		static BOOL CALLBACK	GetCallback(DIDEVICEINSTANCE *pDidIns, void *pThis);
 		static BOOL CALLBACK	EnumObjectCallback(DIDEVICEOBJECTINSTANCE *pDidIns, void *pThis);
 
-		enum{
-		  DX_PROP_MIN = 0,
-		  DX_PROP_MAX = 10000
-		};
 		enum{JOYPAD_MAX		= 4};
 
 		std::array<std::shared_ptr<DXPrimitiveInputDevice>,JOYPAD_MAX>    m_pDeviceWrapped;
@@ -20,8 +16,8 @@ namespace DXLib{
 
 		long          m_iDetectJoypadCount;            //!<	検出したジョイパッドの数
 		long          m_iSettingJoypad;	               //!<	設定しているジョイパッド
-		DIJOYSTATE2   m_JoypadState[JOYPAD_MAX][2];    //!<	ジョイパッドの状態
-		Binary		  m_iStateIndex;                   //!<	状態のインデックス
+		std::array<DIJOYSTATE2,JOYPAD_MAX>   m_JoypadState;
+		int convert(DXJoypad::DefaultButton c){return c;}
 	};
 
 	DXJoypad::DXJoypad(){
@@ -30,7 +26,7 @@ namespace DXLib{
 		__impl__->m_iDetectJoypadCount	= 0;
 		__impl__->m_iSettingJoypad		= 0;
 	
-		memset(__impl__->m_JoypadState, 0, sizeof(DIJOYSTATE2) * 2 * Impl::JOYPAD_MAX);
+		memset(&__impl__->m_JoypadState[0], 0, sizeof(DIJOYSTATE2) * Impl::JOYPAD_MAX);
 	}
 
 	DXJoypad::~DXJoypad(){}
@@ -48,7 +44,7 @@ namespace DXLib{
 		__impl__->m_pInput = __impl__->m_pInputWrapped->getDelegateObject();
 		//ジョイパッドの列挙
 		if(FAILED(__impl__->m_pInput->EnumDevices(
-			DI8DEVCLASS_GAMECTRL, (LPDIENUMDEVICESCALLBACK)Impl::GetCallback, (void *)this, DIEDFL_ATTACHEDONLY
+			DI8DEVCLASS_GAMECTRL, (LPDIENUMDEVICESCALLBACK)Impl::GetCallback, (void *)(__impl__.get()), DIEDFL_ATTACHEDONLY
 		))){
 			return false;
 		}
@@ -67,7 +63,7 @@ namespace DXLib{
 				return false;
 			}
 			if(FAILED(__impl__->m_pDevice[i]->EnumObjects(
-				(LPDIENUMDEVICEOBJECTSCALLBACK)Impl::EnumObjectCallback, (VOID *)this, DIDFT_ALL
+				(LPDIENUMDEVICEOBJECTSCALLBACK)Impl::EnumObjectCallback, (VOID *)(__impl__.get()), DIDFT_ALL
 			))){
 				return false;
 			}
@@ -88,10 +84,10 @@ namespace DXLib{
 		DXJoypad::Impl *pThis = (DXJoypad::Impl *)pCont;
 		//デバイスの作成
 		pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount] = DXPrimitiveInputDevice::Create(pDidIns->guidInstance, pThis->m_pInputWrapped);
-		if(pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount]){
+		if(!pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount]){
 			return DIENUM_STOP;
 		}
-		pThis->m_pDevice[pThis->m_iDetectJoypadCount] = **pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount];
+		pThis->m_pDevice[pThis->m_iDetectJoypadCount] = pThis->m_pDeviceWrapped[pThis->m_iDetectJoypadCount]->getDelegateObject();
 
 
 		//ジョイパッドの数を増加
@@ -118,8 +114,8 @@ namespace DXLib{
 			diprg.diph.dwHeaderSize	= sizeof(DIPROPHEADER);	//ヘッダのサイズ
 			diprg.diph.dwHow		= DIPH_BYID;
 			diprg.diph.dwObj		= pDidIns->dwType;
-			diprg.lMin				= DX_PROP_MIN;
-			diprg.lMax				= DX_PROP_MAX;
+			diprg.lMin				= - DXJoypad::DX_PROP_MAX; // スティックの傾きの範囲
+			diprg.lMax				= DXJoypad::DX_PROP_MAX; // スティックの傾きの範囲
 			if(FAILED(pThis->m_pDevice[pThis->m_iSettingJoypad]->SetProperty(
 				DIPROP_RANGE, &diprg.diph
 			))){
@@ -136,7 +132,7 @@ namespace DXLib{
 	*@return
 	*/
 	void DXJoypad::Update(){
-		__impl__->m_iStateIndex.reverse();
+		//__impl__->m_iStateIndex.reverse();
 		const long iLoopMax = std::min(__impl__->m_iDetectJoypadCount, (long)Impl::JOYPAD_MAX);
 
 		for(long i = 0; i < iLoopMax; ++i){
@@ -145,76 +141,30 @@ namespace DXLib{
 				do{
 					hr = __impl__->m_pDevice[i]->Acquire();
 				}while(hr == DIERR_INPUTLOST);
-				ZeroMemory(&__impl__->m_JoypadState[i][__impl__->m_iStateIndex], sizeof(__impl__->m_JoypadState[i][__impl__->m_iStateIndex]));
+				ZeroMemory(&__impl__->m_JoypadState[i], sizeof(__impl__->m_JoypadState[i]));
 				return ;
 			}
-			hr = __impl__->m_pDevice[i]->GetDeviceState(sizeof(DIJOYSTATE2), &__impl__->m_JoypadState[i][__impl__->m_iStateIndex]);
+			hr = __impl__->m_pDevice[i]->GetDeviceState(sizeof(DIJOYSTATE2), &__impl__->m_JoypadState[i]);
 		}
 	}
 
-	/**
-	*@brief	ジョイパッドのボタンが押されているかを取得する
-	*@return	true : 押されている
-	*@param	iPadID	パッドのＩＤ
-	*@param	i	ボタンＩＤ
-	*/
-	bool DXJoypad::isPressed(long iPadID, long i){
-		if(__impl__->m_JoypadState[iPadID][__impl__->m_iStateIndex].rgbButtons[i] & 0x80){
-			return true;
-		}
-		return false;
+	BYTE DXJoypad::getButtonState(long i, DefaultButton c){
+		return __impl__->m_JoypadState[i].rgbButtons[__impl__->convert(c)];
 	}
 
-	/**
-	*@brief	ジョイパッドが今押されたかどうかを取得する
-	*@return	true :
-	*@param	iPadID	
-	*@param	i
-	*/
-	bool DXJoypad::isJustPressed(long iPadID, long i){
-		if(
-			(__impl__->m_JoypadState[iPadID][__impl__->m_iStateIndex].rgbButtons[i] & 0x80) &&
-			((__impl__->m_JoypadState[iPadID][1 - __impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0)
-		){
-			return true;
-		}
-		return false;
+	D3DXVECTOR2 DXJoypad::getLAnalogStickState(long i){
+		D3DXVECTOR2 v;
+		v.x = __impl__->m_JoypadState[i].lX;
+		v.y = __impl__->m_JoypadState[i].lY;
+		return v;
 	}
 
-	/**
-	*@brief	ジョイパッドのボタンが離されているかどうかを取得する
-	*@return	true : 離されている
-	*@param	iPadID
-	*@param	i
-	*/
-	bool DXJoypad::isFree(long iPadID, long i){
-		if(__impl__->m_JoypadState[iPadID][__impl__->m_iStateIndex].rgbButtons[i] & 0x80){
-			return false;
-		}
-
-		return true;
+	D3DXVECTOR2 DXJoypad::getRAnalogStickState(long i){
+		D3DXVECTOR2 v;
+		v.x = __impl__->m_JoypadState[i].lZ;
+		v.y = __impl__->m_JoypadState[i].lRz;
+		return v;
 	}
 
-	/**
-	*@brief	ジョイパッドのボタンが今離されたかどうかを取得する
-	*@return	true : 今離された
-	*@param	iPadID
-	*@param	i
-	*/
-	bool DXJoypad::isJustPull(long iPadID, long i){
-		if(
-			((__impl__->m_JoypadState[iPadID][__impl__->m_iStateIndex].rgbButtons[i] & 0x80) == 0) &&
-			__impl__->m_JoypadState[iPadID][1 - __impl__->m_iStateIndex].rgbButtons[i] & 0x80
-		){
-			return true;
-		}
-		return false;
-	}
-
-	
-	DIJOYSTATE2 *	DXJoypad::getState(long i)	{return &__impl__->m_JoypadState[i][__impl__->m_iStateIndex];}
-	DIJOYSTATE2 *	DXJoypad::getPreState(long i){return &__impl__->m_JoypadState[i][1 - __impl__->m_iStateIndex];}
-	
-	Binary      DXJoypad::getStateIndex() const  {return __impl__->m_iStateIndex;}
 	long      DXJoypad::getDetectJoypadCount() {return __impl__->m_iDetectJoypadCount;}
 };

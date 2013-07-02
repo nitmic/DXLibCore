@@ -2,29 +2,50 @@
 #include <Windows.h>
 #include <functional>
 #include <Singleton.hpp>
+#include "DXManager.h"
 
 namespace DXLib{
-	class DXManager;
 
-	class DXApp : public Singleton<DXApp>{
-		friend Singleton<DXApp>;
+	class DXApp{
 	public:
-		bool Setup(HINSTANCE hInst, long w, long h, int nCmdShow);
-		void AppLoop();
-		bool AppIdle();
-	
+		DXApp();
+
+		bool Setup(HINSTANCE hInst, long w, long h, int nCmdShow, std::shared_ptr<DXAbsRenderingPolicy> renderingPolicy);
+
 		void	setOnFrameUpdate(std::function<bool(void)> func);
 		void	setOnFrameDraw(std::function<void(void)> func);
-		
-		long	getExitCode();
-		std::shared_ptr<DXManager> & getDXManager();
 
-		DXApp();
-		~DXApp();
+		void AppLoop();
+		bool AppIdle();
+
+		long	getExitCode();
 	private:
 		struct Impl;
 		std::shared_ptr<Impl> __impl__;
-	public:
-		//DXDebugFont			m_DebugFont;	//!<	デバッグ用フォント
 	};
+
+	/*
+	*DXInitialize
+	*/
+	
+	namespace{
+		template<class RenderingPolicy>
+		std::shared_ptr<DXAbsRenderingPolicy> getRenderingPolicy(){
+			return std::make_shared<RenderingPolicy>();
+		}
+		template<>
+		std::shared_ptr<DXAbsRenderingPolicy> getRenderingPolicy<DXManager>(){
+			return GetSingleton<DXManager>();
+		}
+	};
+
+	template<class RenderingPolicy>
+	std::shared_ptr<DXApp> DXInitialize(HINSTANCE hInst, long w, long h, int nCmdShow){
+		auto pApp = std::make_shared<DXApp>();
+		auto renderingPolicy = getRenderingPolicy<RenderingPolicy>();
+		if(!pApp->Setup(hInst, w, h, nCmdShow, renderingPolicy)){
+			return nullptr;
+		}
+		return pApp;
+	}
 };
