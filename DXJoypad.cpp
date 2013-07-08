@@ -1,6 +1,8 @@
 #include "DXStdafx.h"
 #include "DXJoypad.h"
 
+#pragma warning(disable:4244)
+
 namespace DXLib{
 	struct DXJoypad::Impl{
 		static BOOL CALLBACK	GetCallback(DIDEVICEINSTANCE *pDidIns, void *pThis);

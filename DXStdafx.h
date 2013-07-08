@@ -1,6 +1,7 @@
 #pragma once
 #define NOMINMAX
 
+
 #include <assert.h>
 
 #include <string>
