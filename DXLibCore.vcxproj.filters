@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="ソース ファイル\DXInput">
+      <UniqueIdentifier>{499f72ee-10dd-4987-9a95-d33cc831fe47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\DXInput">
+      <UniqueIdentifier>{d5c0a52c-3a74-43a0-9efd-e7230ec63750}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\DXRendering">
+      <UniqueIdentifier>{3b77d0d6-fe53-4e9a-992f-e80bd877954e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\DXRendering">
+      <UniqueIdentifier>{d8f3f203-fd36-47cc-8190-86468f18eec9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DXDeviceObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXFPSCounter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXInput.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXLibInit.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXPrimitive.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXWindow.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXJoypad.cpp">
+      <Filter>ソース ファイル\DXInput</Filter>
+    </ClCompile>
+    <ClCompile Include="DXKeyboard.cpp">
+      <Filter>ソース ファイル\DXInput</Filter>
+    </ClCompile>
+    <ClCompile Include="DXMouse.cpp">
+      <Filter>ソース ファイル\DXInput</Filter>
+    </ClCompile>
+    <ClCompile Include="DXTexture.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXRenderingEngineStorage.cpp">
+      <Filter>ソース ファイル\DXRendering</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DXDeviceObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXFPSCounter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXInput.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXLibInit.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXPrimitive.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXStdafx.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXWindow.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXJoypad.h">
+      <Filter>ヘッダー ファイル\DXInput</Filter>
+    </ClInclude>
+    <ClInclude Include="DXKeyboard.h">
+      <Filter>ヘッダー ファイル\DXInput</Filter>
+    </ClInclude>
+    <ClInclude Include="DXMouse.h">
+      <Filter>ヘッダー ファイル\DXInput</Filter>
+    </ClInclude>
+    <ClInclude Include="DXAbsRenderingPolicy.h">
+      <Filter>ヘッダー ファイル\DXRendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DXAbsRenderingEngine.h">
+      <Filter>ヘッダー ファイル\DXRendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DXRenderingEngineStorage.h">
+      <Filter>ヘッダー ファイル\DXRendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DXLibCore.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
