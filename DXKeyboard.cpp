@@ -47,7 +47,7 @@ namespace DXLib{
 
 	void DXKeyboard::Update(){
 		__impl__->m_KeyboardState.update();
-		__impl__->m_pDevice->GetDeviceState(sizeof(&__impl__->m_KeyboardState.current()), &__impl__->m_KeyboardState.current());
+		__impl__->m_pDevice->GetDeviceState(256, __impl__->m_KeyboardState.current().data());
 
 		HRESULT hr;
 		do{
