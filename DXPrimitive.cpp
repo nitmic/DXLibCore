@@ -95,7 +95,7 @@ namespace DXLib{
 	}
 
 	std::shared_ptr<DXPrimitiveHLSL> DXPrimitiveHLSL::Create(
-			tString name,
+			TUL::tString name,
 			std::shared_ptr<DXPrimitiveDevice> & pDevice
 	){
 		ID3DXBuffer * pErrorMsgs;
